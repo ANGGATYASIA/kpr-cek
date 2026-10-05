@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPR CEK! — Simulasi peluang KPR disetujui</title>
+<meta name="description" content="Tiga menit, tujuh pertanyaan, satu angka peluang. Simulasi pra-kualifikasi KPR berdasarkan praktik umum bank di Indonesia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fafaf6; --card:#ffffff; --ink:#1a1611; --muted:#6f675b;
+  --line:#e8e2d4; --green:#0e3b2c; --green-deep:#0a2b20;
+  --gold:#c69a3a; --gold-soft:#f8f1de;
+  --ok:#1e7e46; --warn:#a86a12; --bad:#b03a2a;
+  --r:14px;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--paper); color:var(--ink); line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:"Fraunces",Georgia,"Times New Roman",serif}
+.wrap{max-width:600px; margin:0 auto; padding:0 18px 56px}
+
+/* kepala */
+.masthead{padding:34px 0 22px}
+.masthead .brand{font-size:30px; font-weight:700; letter-spacing:.5px}
+.masthead .brand em{font-style:normal; color:var(--gold)}
+.masthead p{color:var(--muted); font-size:14.5px; margin-top:6px; max-width:46ch}
+.masthead p b{color:var(--ink); font-weight:700}
+
+/* strip langkah */
+.progress{display:flex; gap:10px; margin:4px 0 20px}
+.pstep{flex:1}
+.pstep .plabel{font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:6px; display:flex; gap:6px; align-items:center}
+.pstep .plabel i{font-style:normal; width:20px; height:20px; border-radius:50%; background:#e7e1d3; color:var(--muted);
+  font-size:11.5px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; flex:none}
+.pstep .pbar{height:4px; border-radius:4px; background:#e7e1d3; overflow:hidden}
+.pstep .pbar b{display:block; height:100%; width:0; background:var(--green); border-radius:4px; transition:width .3s ease}
+.pstep.on .plabel{color:var(--green)}
+.pstep.on .plabel i{background:var(--green); color:#fff}
+.pstep.on .pbar b{width:100%}
+.pstep.done .plabel{color:var(--ink)}
+.pstep.done .plabel i{background:var(--gold); color:#fff}
+.pstep.done .pbar b{width:100%; background:var(--gold)}
+
+/* kartu */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:22px; margin-bottom:14px}
+h2{font-size:21px; margin-bottom:4px; font-weight:700}
+.sub{color:var(--muted); font-size:14px; margin-bottom:6px}
+
+label{display:block; font-size:14px; font-weight:600; margin:16px 0 6px}
+label small{display:block; font-weight:400; color:var(--muted); font-size:12.5px; margin-top:3px; line-height:1.45}
+input[type=text],input[type=number],select{
+  width:100%; padding:13px 14px; font-size:16px; border:1.5px solid var(--line);
+  border-radius:11px; background:#fff; color:var(--ink); font-family:inherit;
+}
+input:focus,select:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(14,59,44,.12)}
+.rp-wrap{position:relative}
+.rp-wrap::before{content:"Rp"; position:absolute; left:14px; top:13px; color:var(--muted); font-size:16px}
+.rp-wrap input{padding-left:44px}
+.pct-wrap{position:relative}
+.pct-wrap::after{content:"%"; position:absolute; right:14px; top:13px; color:var(--muted); font-size:16px}
+.pct-wrap input{padding-right:42px}
+
+.radio-row{display:flex; flex-direction:column; gap:10px; margin-top:8px}
+.radio-card{border:1.5px solid var(--line); border-radius:11px; padding:13px 14px; cursor:pointer;
+  display:flex; gap:12px; align-items:flex-start; transition:border-color .15s, background .15s}
+.radio-card:hover{border-color:#c4bba6}
+.radio-card input{margin-top:3px; accent-color:var(--green); width:18px; height:18px; flex:none}
+.radio-card b{display:block; font-size:14.5px}
+.radio-card span span{font-size:13px; color:var(--muted)}
+.radio-card.sel{border-color:var(--green); background:#f1f6f2}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.nav{display:flex; gap:10px; margin-top:22px}
+button{font-family:inherit; font-size:16px; font-weight:700; border:none; cursor:pointer;
+  border-radius:11px; padding:14px 20px; transition:transform .08s, background .15s}
+button:active{transform:scale(.98)}
+.btn-next{background:var(--green); color:#fff; flex:1}
+.btn-next:hover{background:var(--green-deep)}
+.btn-back{background:#ece7d9; color:var(--ink)}
+.btn-gold{background:var(--gold); color:#2a2108; flex:1}
+.btn-gold:hover{background:#b58c33}
+.err{color:var(--bad); font-size:13.5px; margin-top:10px; display:none}
+.hidden{display:none!important}
+
+/* hasil */
+#hasil{display:none}
+.result-hero{background:var(--green-deep); color:#f5f1e6; border-radius:18px; padding:30px 24px 26px; text-align:center; margin-bottom:14px}
+.result-hero .kicker{font-size:13px; letter-spacing:.4px; color:#cfc6ae; margin-bottom:2px}
+.result-hero .pct{font-size:76px; font-weight:700; line-height:1.05; color:#fff; font-variant-numeric:tabular-nums}
+.result-hero .pct small{font-size:34px; font-weight:600}
+.result-hero .tierline{margin-top:8px; font-size:15px; font-weight:600; color:#f0e6c8}
+.result-hero .hint{font-size:13px; color:#b9b09a; margin-top:6px}
+.stat-row{display:flex; gap:10px; margin-bottom:14px}
+.stat{flex:1; background:var(--card); border:1px solid var(--line); border-radius:11px; padding:12px 8px; text-align:center}
+.stat b{display:block; font-size:15.5px; font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px; color:var(--muted); display:block; margin-top:2px; line-height:1.35}
+
+.faktor{margin:12px 0}
+.faktor .frow{display:flex; justify-content:space-between; align-items:baseline; font-size:13.5px; margin-bottom:6px}
+.faktor .frow b{font-variant-numeric:tabular-nums; font-size:13px}
+.faktor .fnote{font-size:12px; color:var(--muted)}
+.bar{height:8px; background:#ece7d9; border-radius:99px; overflow:hidden}
+.bar i{display:block; height:100%; border-radius:99px; background:var(--green); transition:width .9s ease}
+.bar i.low{background:var(--bad)}
+.bar i.mid{background:var(--warn)}
+
+.saran{border-left:3px solid var(--gold); background:var(--gold-soft); padding:12px 14px; border-radius:0 10px 10px 0; margin-bottom:10px}
+.saran b{display:block; font-size:14px; margin-bottom:3px}
+.saran p{font-size:13.5px; color:#4c4436; line-height:1.5}
+
+.disclaimer{font-size:12.5px; color:var(--muted); background:#f1ede1; border-radius:11px; padding:14px 15px; margin-top:4px; line-height:1.55}
+footer{text-align:center; color:var(--muted); font-size:12.5px; margin-top:24px}
+footer a{color:var(--green); text-decoration:none}
+
+@media(max-width:420px){ .grid2{grid-template-columns:1fr} .result-hero .pct{font-size:64px} }
+@media(prefers-reduced-motion:reduce){
+  .pstep .pbar b, .bar i{transition:none}
+  button{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="brand serif">KPR <em>CEK!</em></div>
+    <p>Tujuh pertanyaan, <b>satu angka peluang</b>. Cek dulu sebelum survei ke bank: datanya tidak dikirim ke mana pun.</p>
+  </div>
+
+  <div id="wizard">
+    <div class="progress" aria-hidden="true">
+      <div class="pstep on" data-s="1"><div class="plabel"><i>1</i>Profil</div><div class="pbar"><b></b></div></div>
+      <div class="pstep" data-s="2"><div class="plabel"><i>2</i>Keuangan</div><div class="pbar"><b></b></div></div>
+      <div class="pstep" data-s="3"><div class="plabel"><i>3</i>Rumah</div><div class="pbar"><b></b></div></div>
+    </div>
+
+    <div class="card" data-pane="1">
+      <h2>Siapa yang mengajukan</h2>
+      <p class="sub">Bank menilai orangnya dulu, baru angkanya.</p>
+      <label>Nama panggilan <small>Opsional. Supaya hasilnya menyebut namamu.</small></label>
+      <input type="text" id="nama" placeholder="cth: Budi" maxlength="30" autocomplete="off">
+      <label>Usia sekarang</label>
+      <input type="number" id="usia" placeholder="cth: 30" min="17" max="70" inputmode="numeric">
+      <label>Pekerjaan</label>
+      <select id="kerja">
+        <option value="">Pilih salah satu</option>
+        <option value="pns">PNS / BUMN / TNI-Polri</option>
+        <option value="tetap">Karyawan swasta tetap</option>
+        <option value="profesional">Profesional (dokter, pengacara, konsultan)</option>
+        <option value="wiraswasta">Wiraswasta</option>
+        <option value="kontrak">Kontrak / freelance</option>
+      </select>
+      <label>Lama bekerja atau usaha berjalan <small>Dalam tahun. Kurang dari 1 tahun, isi 0.</small></label>
+      <input type="number" id="masaKerja" placeholder="cth: 3" min="0" max="50" inputmode="numeric">
+      <p class="err" id="err1" role="alert"></p>
+      <div class="nav"><button class="btn-next" onclick="lanjut(2)">Lanjut</button></div>
+    </div>
+
+    <div class="card hidden" data-pane="2">
+      <h2>Kondisi keuangan</h2>
+      <p class="sub">Bagian paling menentukan: seberapa besar cicilan dibanding penghasilan.</p>
+      <label>Penghasilan bersih per bulan <small>Gaji atau laba bersih yang masuk ke rekeningmu.</small></label>
+      <div class="rp-wrap"><input type="text" id="penghasilan" class="rp" placeholder="15.000.000" inputmode="numeric" autocomplete="off"></div>
+      <label>Total cicilan berjalan per bulan <small>Kartu kredit, KTA, paylater, kendaraan, dan lainnya. Isi 0 kalau tidak ada.</small></label>
+      <div class="rp-wrap"><input type="text" id="cicilan" class="rp" placeholder="0" inputmode="numeric" autocomplete="off"></div>
+      <label>Riwayat kredit (SLIK OJK, dulu BI Checking)</label>
+      <div class="radio-row" id="slikRow">
+        <label class="radio-card"><input type="radio" name="slik" value="lancar"><span><b>Lancar</b><span>Tidak pernah telat bayar cicilan apa pun.</span></span></label>
+        <label class="radio-card"><input type="radio" name="slik" value="telat"><span><b>Pernah telat di bawah 90 hari</b><span>Sudah lunas, tapi tercatat di SLIK.</span></span></label>
+        <label class="radio-card"><input type="radio" name="slik" value="macet"><span><b>Pernah macet</b><span>Kolektibilitas 3 sampai 5, atau masih ada tunggakan.</span></span></label>
+      </div>
+      <p class="err" id="err2" role="alert"></p>
+      <div class="nav"><button class="btn-back" onclick="kembali(1)">Kembali</button><button class="btn-next" onclick="lanjut(3)">Lanjut</button></div>
+    </div>
+
+    <div class="card hidden" data-pane="3">
+      <h2>Rumah yang diincar</h2>
+      <p class="sub">Terakhir: harga rumah dan skema pembayarannya.</p>
+      <label>Harga properti</label>
+      <div class="rp-wrap"><input type="text" id="harga" class="rp" placeholder="800.000.000" inputmode="numeric" autocomplete="off"></div>
+      <label>Uang muka (DP) <small id="dpInfo">Patokan umum bank untuk rumah pertama: 10 sampai 15 persen.</small></label>
+      <div class="rp-wrap"><input type="text" id="dp" class="rp" placeholder="80.000.000" inputmode="numeric" autocomplete="off"></div>
+      <div class="grid2">
+        <div>
+          <label>Tenor</label>
+          <select id="tenor">
+            <option value="5">5 tahun</option>
+            <option value="10">10 tahun</option>
+            <option value="15" selected>15 tahun</option>
+            <option value="20">20 tahun</option>
+            <option value="25">25 tahun</option>
+          </select>
+        </div>
+        <div>
+          <label>Bunga per tahun</label>
+          <div class="pct-wrap"><input type="number" id="bunga" value="7.75" min="1" max="20" step="0.25" inputmode="decimal"></div>
+        </div>
+      </div>
+      <p class="err" id="err3" role="alert"></p>
+      <div class="nav"><button class="btn-back" onclick="kembali(2)">Kembali</button><button class="btn-gold" onclick="hitung()">Lihat hasil</button></div>
+    </div>
+  </div>
+
+  <div id="hasil">
+    <div class="result-hero">
+      <div class="kicker" id="salam">Hasil simulasimu</div>
+      <div class="pct serif"><span id="pctAngka">0</span><small>%</small></div>
+      <div class="tierline" id="tierline">peluang lolos</div>
+      <div class="hint" id="hint"></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><b id="stAngsuran">–</b><span>Estimasi angsuran per bulan</span></div>
+      <div class="stat"><b id="stDsr">–</b><span>Rasio cicilan terhadap penghasilan</span></div>
+      <div class="stat"><b id="stPlafon">–</b><span>Plafon kredit yang diajukan</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Penilaian per faktor</h2>
+      <p class="sub">Enam hal yang dipakai bank menilai pengajuanmu.</p>
+      <div id="faktorList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Yang bisa kamu perbaiki</h2>
+      <p class="sub">Urut dari yang paling berpengaruh.</p>
+      <div id="saranList"></div>
+    </div>
+
+    <div class="disclaimer">
+      Angka di atas adalah <b>estimasi pra-kualifikasi</b>, bukan keputusan bank. Dihitung dari praktik umum perbankan di Indonesia:
+      rasio cicilan maksimal 30–40% dari penghasilan, riwayat SLIK OJK, batas lunas usia 55 tahun (karyawan) atau 60–65 tahun
+      (profesional/wiraswasta), dan aturan uang muka Bank Indonesia. Tiap bank punya kebijakan sendiri, dan analis bank
+      menilai dokumen serta kondisi agunan secara langsung. Semua perhitungan berjalan di perangkatmu; tidak ada data yang dikirim ke mana pun.
+    </div>
+
+    <div class="nav"><button class="btn-back" onclick="ulang()" style="flex:1">Hitung ulang</button></div>
+  </div>
+
+  <footer>KPR CEK! — alat bantu simulasi, bukan layanan keuangan.</footer>
+</div>
+
+<script>
+/* ---------- util ---------- */
+const $ = id => document.getElementById(id);
+const fmtRp = n => 'Rp' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const parseRp = s => Number(String(s).replace(/[^\d]/g, '')) || 0;
+
+document.querySelectorAll('.rp').forEach(el => {
+  el.addEventListener('input', () => {
+    const v = parseRp(el.value);
+    el.value = v ? v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
+  });
+});
+document.querySelectorAll('#slikRow .radio-card').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#slikRow .radio-card').forEach(x => x.classList.remove('sel'));
+    c.classList.add('sel');
+  });
+});
+$('harga').addEventListener('input', () => {
+  const h = parseRp($('harga').value);
+  $('dpInfo').textContent = h > 0
+    ? 'Patokan umum bank untuk rumah pertama: 10 sampai 15 persen (' + fmtRp(h * 0.10) + ' sampai ' + fmtRp(h * 0.15) + ').'
+    : 'Patokan umum bank untuk rumah pertama: 10 sampai 15 persen.';
+});
+
+/* ---------- wizard ---------- */
+function showStep(n) {
+  document.querySelectorAll('[data-pane]').forEach(p => p.classList.toggle('hidden', p.dataset.pane != n));
+  document.querySelectorAll('.pstep').forEach(s => {
+    const k = +s.dataset.s;
+    s.classList.toggle('on', k === n);
+    s.classList.toggle('done', k < n);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function err(id, msg) {
+  const e = $(id);
+  e.textContent = msg || '';
+  e.style.display = msg ? 'block' : 'none';
+  return !msg;
+}
+
+function lanjut(n) {
+  if (n === 2) {
+    const usia = +$('usia').value, kerja = $('kerja').value;
+    if (!usia || usia < 17 || usia > 70) { err('err1', 'Isi usiamu yang sebenarnya, antara 17 dan 70 tahun.'); return; }
+    if (!kerja) { err('err1', 'Pilih jenis pekerjaanmu. Ini memengaruhi batas usia pelunasan.'); return; }
+    if ($('masaKerja').value === '' || +$('masaKerja').value < 0 || +$('masaKerja').value > 50) { err('err1', 'Isi lama bekerja atau usaha dalam tahun. Belum setahun, isi 0.'); return; }
+    err('err1');
+  }
+  if (n === 3) {
+    const slik = document.querySelector('input[name=slik]:checked');
+    if (parseRp($('penghasilan').value) <= 0) { err('err2', 'Isi penghasilan bersih per bulan. Tanpa ini rasionya tidak bisa dihitung.'); return; }
+    if (!slik) { err('err2', 'Pilih riwayat kreditmu. Kalau ragu, cek SLIK OJK dulu sebelum lanjut.'); return; }
+    err('err2');
+  }
+  showStep(n);
+}
+function kembali(n) { showStep(n); }
+function ulang() { $('hasil').style.display = 'none'; $('wizard').style.display = 'block'; showStep(1); }
+
+/* ---------- matematika KPR ---------- */
+function angsuran(P, bungaThn, tenorThn) {
+  const i = bungaThn / 100 / 12, n = Math.round(tenorThn * 12);
+  if (P <= 0) return 0;
+  if (i === 0) return P / n;
+  const f = Math.pow(1 + i, n);
+  return P * i * f / (f - 1);
+}
+function plafonMaks(A, bungaThn, tenorThn) {
+  const i = bungaThn / 100 / 12, n = Math.round(tenorThn * 12);
+  if (i === 0) return A * n;
+  const f = Math.pow(1 + i, n);
+  return A * (f - 1) / (i * f);
+}
+function skorDSR(dsr) {
+  /* Praktik umum bank: total cicilan aman di 30-40% penghasilan. */
+  const p = [[0.30,100],[0.35,85],[0.40,65],[0.45,40],[0.50,20],[0.70,5]];
+  if (dsr <= p[0][0]) return 100;
+  for (let k = 1; k < p.length; k++) {
+    if (dsr <= p[k][0]) {
+      const x0 = p[k-1][0], y0 = p[k-1][1], x1 = p[k][0], y1 = p[k][1];
+      return y0 + (y1 - y0) * (dsr - x0) / (x1 - x0);
+    }
+  }
+  return 5;
+}
+
+/* ---------- hitung ---------- */
+function hitung() {
+  const harga = parseRp($('harga').value), dp = parseRp($('dp').value);
+  const tenor = +$('tenor').value, bunga = parseFloat($('bunga').value);
+  if (harga <= 0) { err('err3', 'Isi harga properti yang kamu incar.'); return; }
+  if (dp < 0 || dp >= harga) { err('err3', 'DP harus lebih kecil dari harga properti.'); return; }
+  if (!(bunga >= 1 && bunga <= 20)) { err('err3', 'Isi suku bunga antara 1 dan 20 persen per tahun.'); return; }
+  err('err3');
+
+  const d = {
+    nama: $('nama').value.trim(),
+    usia: +$('usia').value, kerja: $('kerja').value, masaKerja: +$('masaKerja').value,
+    penghasilan: parseRp($('penghasilan').value), cicilan: parseRp($('cicilan').value),
+    slik: document.querySelector('input[name=slik]:checked').value,
+    harga, dp, tenor, bunga
+  };
+
+  const plafon = Math.max(0, d.harga - d.dp);
+  const ang = angsuran(plafon, d.bunga, d.tenor);
+  const dsr = (ang + d.cicilan) / d.penghasilan;
+  /* Batas lunas: 55 tahun karyawan, 60 tahun profesional/wiraswasta (umumnya 60-65, tergantung bank). */
+  const batasUsia = (d.kerja === 'profesional' || d.kerja === 'wiraswasta') ? 60 : 55;
+
+  const sDSR = skorDSR(dsr);
+  const sSLIK = { lancar: 100, telat: 55, macet: 10 }[d.slik];
+  const sKerja = { pns: 100, tetap: 88, profesional: 82, wiraswasta: 68, kontrak: 55 }[d.kerja];
+  const usiaOk = d.usia >= 21 && d.usia + d.tenor <= batasUsia;
+  const sUsia = usiaOk ? 100 : 0;
+  const rDP = d.harga > 0 ? d.dp / d.harga : 0;
+  const sDP = rDP >= 0.20 ? 100 : rDP >= 0.15 ? 85 : rDP >= 0.10 ? 70 : rDP >= 0.05 ? 50 : 30;
+  let sMasa = d.masaKerja >= 2 ? 100 : d.masaKerja >= 1 ? 70 : 35;
+  if (d.kerja === 'wiraswasta' && d.masaKerja < 2) sMasa = Math.min(sMasa, 45);
+
+  let total = 0.35*sDSR + 0.20*sSLIK + 0.15*sKerja + 0.10*sUsia + 0.10*sDP + 0.10*sMasa;
+  if (d.slik === 'macet') total = Math.min(total, 35);
+  if (dsr > 0.50) total = Math.min(total, 40);
+  if (!usiaOk) total = Math.min(total, 30);
+  total = Math.round(Math.min(97, Math.max(3, total)));
+
+  const tier = total >= 85 ? 'Sangat tinggi — pengajuanmu layak dibawa ke bank.'
+    : total >= 70 ? 'Tinggi — peluangmu bagus, tinggal rapikan dokumen.'
+    : total >= 55 ? 'Cukup — ada yang perlu dibenahi dulu sebelum apply.'
+    : total >= 40 ? 'Rendah — perbaiki faktor di bawah sebelum mengajukan.'
+    : 'Sangat rendah — jangan apply dulu, benahi dulu yang di bawah.';
+
+  /* saran, urut dari yang paling berpengaruh */
+  const saran = [];
+  if (d.slik === 'macet') saran.push(['Beresi riwayat kredit dulu',
+    'Kolektibilitas 3 sampai 5 hampir selalu ditolak. Lunasi tunggakan, lalu jaga 12 sampai 24 bulan pembayaran lancar sebelum mengajukan.']);
+  if (sDSR < 70) {
+    const mampu = 0.35 * d.penghasilan - d.cicilan;
+    if (mampu > 0) {
+      const dpButuh = Math.max(0, d.harga - plafonMaks(mampu, d.bunga, d.tenor));
+      const target = Math.max(dpButuh, 0.10 * d.harga);
+      saran.push(['Turunkan angsuran ke kisaran ' + fmtRp(mampu) + ' per bulan',
+        'Caranya: naikkan DP ke sekitar ' + fmtRp(target) + ', atau pilih tenor lebih panjang. Rasio cicilan idealnya tidak lewat 35% penghasilan.']);
+    } else {
+      saran.push(['Lunasi cicilan berjalan dulu',
+        'Cicilanmu saat ini saja sudah di atas 35% penghasilan. Kurangi utang berjalan sebelum menambah KPR.']);
+    }
+  } else if (d.slik === 'telat') saran.push(['Jaga 12 bulan ke depan tetap lancar',
+    'Catatan pernah telat menurunkan nilai. Pastikan tidak ada keterlambatan pembayaran apa pun selama setahun.']);
+  if (!usiaOk) saran.push(['Sesuaikan tenor dengan usiamu',
+    'Dengan pekerjaanmu, KPR umumnya harus lunas sebelum usia ' + batasUsia + '. Tenor maksimalmu ' + Math.max(0, batasUsia - d.usia) + ' tahun.']);
+  if (sDP < 70) saran.push(['Naikkan uang muka',
+    'Usahakan DP minimal 10% (' + fmtRp(0.10 * d.harga) + '). DP 20% memberi peluang paling baik sekaligus cicilan lebih ringan.']);
+  if (sMasa < 70) saran.push(['Tunggu sampai masa kerja cukup',
+    'Bank umumnya mensyaratkan 1 sampai 2 tahun masa kerja atau usaha dengan penghasilan yang bisa diverifikasi.']);
+  if (!saran.length) saran.push(['Siapkan dokumen, lalu bandingkan 2 sampai 3 bank',
+    'Slip gaji 3 bulan, rekening koran, KTP, dan KK. Mengajukan ke beberapa bank sekaligus membantumu dapat bunga terbaik.']);
+
+  /* tampilkan */
+  $('wizard').style.display = 'none';
+  $('hasil').style.display = 'block';
+  $('salam').textContent = d.nama ? 'Hasil simulasi untuk ' + d.nama : 'Hasil simulasimu';
+  $('tierline').textContent = tier;
+  $('hint').textContent = 'Estimasi pra-kualifikasi — bukan keputusan bank.';
+  $('stAngsuran').textContent = fmtRp(ang);
+  $('stDsr').textContent = Math.round(dsr * 100) + '%';
+  $('stPlafon').textContent = fmtRp(plafon);
+
+  const faktor = [
+    ['Rasio cicilan terhadap penghasilan', sDSR, 'Bank umumnya memberi batas 30 sampai 40%.'],
+    ['Riwayat kredit (SLIK OJK)', sSLIK, 'Kolektibilitas 1 artinya lancar.'],
+    ['Jenis pekerjaan', sKerja, 'Status tetap dinilai paling stabil.'],
+    ['Usia dibanding tenor', sUsia, d.usia + d.tenor <= batasUsia ? 'Lunas di usia ' + (d.usia + d.tenor) + ', masih dalam batas.' : 'Melewati batas lunas usia ' + batasUsia + '.'],
+    ['Uang muka', sDP, Math.round(rDP * 100) + '% dari harga properti.'],
+    ['Masa kerja atau usaha', sMasa, d.masaKerja + ' tahun. Umumnya disyaratkan 1 sampai 2 tahun.']
+  ];
+  $('faktorList').innerHTML = faktor.map(f => {
+    const sk = Math.round(f[1]);
+    const cls = sk < 40 ? 'low' : sk < 70 ? 'mid' : '';
+    return '<div class="faktor"><div class="frow"><span>' + f[0] + '</span><b>' + sk + '</b></div>' +
+      '<div class="bar"><i class="' + cls + '" style="width:0%" data-w="' + sk + '"></i></div>' +
+      '<div class="fnote">' + f[2] + '</div></div>';
+  }).join('');
+  $('saranList').innerHTML = saran.slice(0, 3).map(s =>
+    '<div class="saran"><b>' + s[0] + '</b><p>' + s[1] + '</p></div>'
+  ).join('');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  requestAnimationFrame(() => {
+    let cur = 0;
+    const tick = () => {
+      cur += Math.max(1, Math.round((total - cur) / 8));
+      if (cur >= total) cur = total;
+      $('pctAngka').textContent = cur;
+      if (cur < total) requestAnimationFrame(tick);
+    };
+    tick();
+    document.querySelectorAll('#faktorList .bar i').forEach(b => { b.style.width = b.dataset.w + '%'; });
+  });
+}
+</script>
+</body>
+</html>
